@@ -1,0 +1,21 @@
+{
+
+  "manifest_version": 2,
+  "name": "svt-translator",
+  "version": "1.0",
+
+  "description": "Add translation to swedish videos",
+
+  "icons": {
+    "48": "icons/sw.png"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["*://*.svtplay.se/*"],
+      "js": ["svt-translator.js"]
+    }
+  ]
+
+}
+
