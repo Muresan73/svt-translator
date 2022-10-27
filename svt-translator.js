@@ -13,7 +13,7 @@ activatorButton.onclick = () => {
   console.log('translation activated');
 
   console.log('subtitle_container searching...');
-  let subtitle_container = document.querySelector("div[class^='_video-player__text']");
+  const subtitle_container = document.querySelector("div[class^='_video-player__text']");
   if (subtitle_container == null) return console.log('subtitle_container can not be found');
   console.log('subtitle_container detected');
 
@@ -21,30 +21,34 @@ activatorButton.onclick = () => {
   console.log('subtitle_container onchange listener attached');
   document.body.style.border = 'red 5px solid';
 
-  const translation = new Promise((resolve, reject) => {
-    setTimeout(() => {
-      resolve('foo');
-    }, 1000);
-  });
-
-  
-
+  const translation = text =>
+    fetch('http://localhost:5000/translate', {
+      method: 'POST',
+      body: JSON.stringify({
+        q: text,
+        source: 'sv',
+        target: 'en'
+      }),
+      headers: { 'Content-Type': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(translate_json => translate_json.translatedText)
 
   console.log('stub promise initiated');
 
   function subtitleChanged(e) {
     console.log('subtitle changed');
 
-    let subtitle_container = e.target;
+    const subtitle_container = e.target;
 
-    let text_container = subtitle_container.querySelector('p');
-    let clone = text_container.firstChild.cloneNode(true);
+    const text_container = subtitle_container.querySelector('p');
+    const clone = text_container.firstChild.cloneNode(true);
     text_container.appendChild(document.createElement('br'));
     text_container.appendChild(clone);
 
     Array.from(clone.querySelectorAll('span>span>span'))
       .filter(span => !span.innerHTML.startsWith('<span>'))
-      .forEach(span => translation.then(text => (span.textContent = text)));
+      .forEach(span => translation(span.innerText).then(translation_text => (span.innerText = translation_text)));
 
     console.log('new element added ');
   }
