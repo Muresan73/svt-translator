@@ -24,8 +24,11 @@ activatorButton.onclick = () => {
   const translation = new Promise((resolve, reject) => {
     setTimeout(() => {
       resolve('foo');
-    }, 1);
+    }, 1000);
   });
+
+  
+
 
   console.log('stub promise initiated');
 
@@ -41,11 +44,7 @@ activatorButton.onclick = () => {
 
     Array.from(clone.querySelectorAll('span>span>span'))
       .filter(span => !span.innerHTML.startsWith('<span>'))
-      .forEach(span => span.textContent = "text");
-
-    // Array.from(clone.querySelectorAll('span>span>span'))
-    //   .filter(span => !span.innerHTML.startsWith('<span>'))
-    //   .forEach(span => translation.then(text => (span.textContent = text)));
+      .forEach(span => translation.then(text => (span.textContent = text)));
 
     console.log('new element added ');
   }
