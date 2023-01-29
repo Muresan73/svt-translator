@@ -13,20 +13,7 @@ activatorButton.onclick = () => {
   const subtitle_container = document.querySelector("div[class^='_video-player__text']");
   if (subtitle_container == null) return console.log('subtitle_container can not be found');
 
-  subtitleChanged = e => {
-    const translation = text =>
-      fetch('http://localhost:5000/translate', {
-        method: 'POST',
-        body: JSON.stringify({
-          q: text,
-          source: 'sv',
-          target: 'en'
-        }),
-        headers: { 'Content-Type': 'application/json' }
-      })
-        .then(response => response.json())
-        .then(translate_json => translate_json.translatedText);
-
+  subtitleChanged = translation => e => {
     const subtitle_container = e.target;
 
     const text_container = subtitle_container.querySelector('p');
@@ -40,14 +27,36 @@ activatorButton.onclick = () => {
       .filter(span => !span.innerHTML.startsWith('<span>'))
       .forEach(span => {
         translation(span.innerText).then(translation_text => (span.innerText = translation_text));
-        span.style.border = 'yellow 1px solid';
+        span.style.borderBottom = 'yellow 1px solid';
         span.innerText = '  ';
       });
-
   };
 
   activatorButton.remove();
 
-  subtitle_container.addEventListener('DOMSubtreeModified', subtitleChanged);
+  subtitle_container.addEventListener('DOMSubtreeModified', subtitleChanged(translation_mymemory));
   document.body.style.border = 'red 5px solid';
 };
+
+const translationLocal = text =>
+  fetch('http://localhost:5000/translate', {
+    method: 'POST',
+    body: JSON.stringify({
+      q: text,
+      source: 'sv',
+      target: 'en'
+    }),
+    headers: { 'Content-Type': 'application/json' }
+  })
+    .then(response => response.json())
+    .then(translate_json => translate_json.translatedText);
+
+const translation_mymemory = text =>
+  fetch(
+    `https://api.mymemory.translated.net/get?${new URLSearchParams({
+      q: text.replaceAll('-', '').replaceAll('\n', ' \n ')
+    })}&langpair=sv|en`
+  )
+    .then(response => response.json())
+    .then(x => (console.log(x), x))
+    .then(translate_json => translate_json.matches.find(match => match.model === 'neural').translation);
